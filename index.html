@@ -1,45 +1,69 @@
 <html>
 	<head>
 		<title>Wanna app</title>
-		<style>canvas { width: 100%; height: 100% }</style>
+		<style>
+		canvas 
+		{ 
+			width: 100%; height: 100% 
+		}
+		
+		div#canvas-frame
+		{
+		    border: none;
+		    cursor: pointer;
+		    width: 100%;
+		    height: 100%;
+		    background-color: #EEEEEE;
+		}
+		</style>
 	</head>
 	<body>
 		<script src="https://rawgithub.com/mrdoob/three.js/master/build/three.js"></script>
 		<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 		<script>
-			// Our Javascript will go here.
-			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			document.body.appendChild( renderer.domElement );
-
-
-			var geometry = new THREE.CubeGeometry(1,1,1);
-			var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-			var cube = new THREE.Mesh( geometry, material );
-			scene.add( cube );
-
-			camera.position.z = 5;
-
-
-			function render() {
-				requestAnimationFrame(render);
-
-				cube.rotation.x += 0.1;
-				cube.rotation.y += 0.1;
-				renderer.render(scene, camera);
-			}
-			render();
 
 			$(document).ready(function(){
 
-				$(window).resize(function(arg){
-					renderer.setSize(window.innerWidth, window.innerHeight);
-				});
+
 				
+
+				// Our Javascript will go here.
+				var scene = new THREE.Scene();
+				var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+				var renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.getElementById('canvas-frame').appendChild( renderer.domElement );
+
+
+				var geometry = new THREE.CubeGeometry(1,1,1);
+				var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				var cube = new THREE.Mesh( geometry, material );
+				scene.add( cube );
+
+				camera.position.z = 5;
+
+
+				function render() {
+					requestAnimationFrame(render);
+
+					cube.rotation.x += 0.1;
+					cube.rotation.y += 0.1;
+					renderer.render(scene, camera);
+				}
+				render();
+
+				$(window).resize(function(arg){
+					// update the resolution of the webgl window when the canvas size is changing.
+					renderer.setSize(window.innerWidth, window.innerHeight);
+
+					// keep the aspect when the canvas size is changing.
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+				});
 			});
 		</script>
+		<div id="canvas-frame"></div>
 	</body>
 </html>
