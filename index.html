@@ -1,6 +1,13 @@
 <html>
 	<head>
 		<title>Wanna app</title>
+
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+	  	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	  	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+		<script src="https://rawgithub.com/mrdoob/three.js/master/build/three.js"></script>
+		<script type="text/javascript" src="js/controls/OrbitControls.js"></script>
+		<script src="modelloader.js"></script>
 		<style>
 		canvas 
 		{ 
@@ -15,26 +22,77 @@
 		    height: 100%;
 		    background-color: #EEEEEE;
 		}
+
+		.ui-progressbar {
+	  		position: absolute;
+	  		left: 50;
+	  		top: 32;
+	  		height: 15;
+	  		width: 200;
+	  	}
+	  	.progress-label {
+	  		position: absolute;
+	  		font-size: 5;
+	  		font-weight: bold;
+	  		text-shadow: 1px 1px 0 #fff;
+	  		z-index: 120;
+	  	}
 		</style>
 	</head>
 	<body>
-		<script src="https://rawgithub.com/mrdoob/three.js/master/build/three.js"></script>
-		<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 		<script>
+			
 
+			var camera, controls, scene, renderer;
 
 			$(document).ready(function(){
 
+				var progressbar = $( "#progressbar" ),
+			      progressLabel = $( ".progress-label" );
+			 
+			    progressbar.progressbar({
+			      value: false,
+			      change: function() {
+			        progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+			      },
+			      complete: function() {
+			        progressLabel.text( "Complete!" );
+			      }
+			    });
 
-				
+
 
 				// Our Javascript will go here.
-				var scene = new THREE.Scene();
-				var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
+				controls = new THREE.OrbitControls(camera);
+				controls.addEventListener('change', render);
 
-				var renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.getElementById('canvas-frame').appendChild( renderer.domElement );
+
+				// add light node.
+				// var lightNode = new THREE.Object3D();
+				// var dir_light1 = new THREE.DirectionalLight(new THREE.Color(0xffd8ab), 1.0);
+				// dir_light1.position.set(-1, 0, 1);
+				// dir_light1.position.multiplyScalar(10000);
+				// lightNode.add(dir_light1);
+
+				// var dir_light2 = new THREE.DirectionalLight( 0xabd8ff, 0.75);
+				// dir_light2.position.set( 2,0,1);
+				// dir_light2.position.multiplyScalar(10000);
+
+				// var amb_light = new THREE.AmbientLight( new THREE.Color().setRGB(0.8, 0.9, 1.0));
+				// //scene.add(amb_light);
+				// camera.add(lightNode);
+
+				var ambient = new THREE.AmbientLight( 0x555555 );
+				scene.add(ambient);
+
+				var light = new THREE.DirectionalLight( new THREE.Color(0xffd8ab), 1.0 );
+				light.position = camera.position;
+				scene.add(light);
 
 
 				var geometry = new THREE.CubeGeometry(1,1,1);
@@ -45,25 +103,43 @@
 				camera.position.z = 5;
 
 
-				function render() {
-					requestAnimationFrame(render);
 
-					cube.rotation.x += 0.1;
-					cube.rotation.y += 0.1;
+
+				// load model.
+				modelloader.loadmodel(scene);
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				// $(window).resize(function(arg){
+				// 	// update the resolution of the webgl window when the canvas size is changing.
+				// 	renderer.setSize(window.innerWidth, window.innerHeight);
+
+				// 	// keep the aspect when the canvas size is changing.
+				// 	camera.aspect = window.innerWidth / window.innerHeight;
+				// 	camera.updateProjectionMatrix();
+				// });
+			});
+
+			function onWindowResize() 
+			{
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				render();
+			}
+
+			
+				function render() {
+					// requestAnimationFrame(render);
+
+					// cube.rotation.x += 0.1;
+					// cube.rotation.y += 0.1;
 					renderer.render(scene, camera);
 				}
-				render();
-
-				$(window).resize(function(arg){
-					// update the resolution of the webgl window when the canvas size is changing.
-					renderer.setSize(window.innerWidth, window.innerHeight);
-
-					// keep the aspect when the canvas size is changing.
-					camera.aspect = window.innerWidth / window.innerHeight;
-					camera.updateProjectionMatrix();
-				});
-			});
 		</script>
+		<div id="progressbar"><div class="progress-label">Loading...</div></div>
 		<div id="canvas-frame"></div>
 	</body>
 </html>
