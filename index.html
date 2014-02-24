@@ -23,6 +23,16 @@
 		    background-color: #EEEEEE;
 		}
 
+		div#draggable_cuttingplane_window
+		{
+			position: absolute;
+			right: 30%;
+			top: 32;
+			height: 200;
+			width: 240;
+			z-index: 120;
+		}
+
 		.ui-progressbar {
 	  		position: absolute;
 	  		left: 50;
@@ -37,6 +47,94 @@
 	  		text-shadow: 1px 1px 0 #fff;
 	  		z-index: 120;
 	  	}
+
+	  	.draggable
+	  	{
+	  		z-index: 120;
+	  	}
+
+	  	.draggable>.header 
+	  	{
+	  		position: absolute;
+	  		left: 0px;
+	  		top: 0px;
+	  		width: 100%;
+	  		height: 25px;
+	  		background: #000;
+	  	}
+
+	  	.draggable>.header>.title
+	  	{
+	  		position: absolute;
+	  		left: 9px;
+	  		top: 4px;
+	  		font-size: 10pt;
+	  		color: #ffffff;
+	  	}
+
+	  	.draggable>.header>.close
+	  	{
+	  		position: absolute;
+	  		right: 6px;
+	  		top: 5px;
+	  		width: 14px;
+	  		height: 14px;
+	  		background: url("/images/_/viewer/popup_close.png") no-repeat center;
+	  		cursor: pointer;
+	  	}
+
+	  	.draggable>.body
+	  	{
+	  		position:absolute;
+	  		left:0px;
+	  		top:25px;
+	  		width:100%;
+	  		height:100%
+	  	}
+
+	  	.draggable>.body>.planehint
+	  	{
+	  		position:absolute;
+	  		left:16px;top:13px;
+	  		font-size:9pt;
+	  		color:#999999;
+	  		-moz-user-select:-moz-none;
+	  		-khtml-user-select:none;
+	  		-webkit-user-select:none;
+	  		-ms-user-select:none;
+	  		user-select:none
+	  	}
+
+
+	  	.draggable>.body>.annotator-button[planex]{position:absolute;left:13px;top:34px;width:34px;height:34px;background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -573px 1px}
+	  	.draggable>.body>.annotator-button[planex]:hover{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -573px -33px}
+	  	.draggable>.body>.annotator-button[planex][checked]{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -573px -67px}
+
+	  	.draggable>.body>.annotator-button[planey]{position:absolute;left:52px;top:34px;width:34px;height:34px;background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -607px 1px}
+	  	.draggable>.body>.annotator-button[planey]:hover{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -607px -33px}
+	  	.draggable>.body>.annotator-button[planey][checked]{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -607px -67px}
+
+		.draggable>.body>.annotator-button[planez]{position:absolute;left:90px;top:34px;width:34px;height:34px;background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -641px 1px}
+		.draggable>.body>.annotator-button[planez]:hover{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -641px -33px}
+		.draggable>.body>.annotator-button[planez][checked]{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -641px -67px}
+
+		.draggable>.body>.sliderhint{position:absolute;left:16px;top:93px;font-size:9pt;color:#999999;-moz-user-select:-moz-none;-khtml-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none}	
+
+		.draggable>.body>.slider{position:absolute;left:15px;top:116px;width:210px;height:43px;background:#777;border-radius:4px}
+
+		.draggable>.body>.slider>.box{position:absolute;left:5px;top:9px;width:170px;height:25px}
+		.draggable>.body>.slider>.inverse{position:absolute;right:8px;top:8px;width:27px;height:27px;background:url("/images/_/viewer/popup_inverse.png") repeat scroll 0 0 transparent;cursor:pointer}
+
+		.draggable .leftBlocker{position:absolute;top:0px;left:0px;width:6px;height:100%;background:url("/images/_/viewer/skins/default/leftside_bg.gif") repeat scroll 0 0 transparent;z-index:121}
+		.draggable .rightBlocker{position:absolute;top:0px;right:0px;width:6px;height:100%;background:url("/images/_/viewer/skins/default/rightside_bg.gif") repeat scroll 0 0 transparent;z-index:121}
+
+		.draggable .dhtmlxSlider{position:relative;overflow:hidden;height:25px;left:0px}
+		.draggable .dhtmlxSlider .selector{position:absolute;overflow:hidden;height:100%;width:21px}
+		.draggable .dhtmlxSlider .leftSide{position:absolute;left:0px;top:0px;width:0px;height:100%}
+		.draggable .dhtmlxSlider .leftZone{position:absolute;top:0px;left:0px;width:0px;height:100%}
+		.draggable .dhtmlxSlider .rightSide{position:absolute;right:0px;top:0px;width:0px;height:100%}
+		.draggable .dhtmlxSlider .rightZone{position:absolute;left:0px;width:0px;height:100%}
+
 		</style>
 	</head>
 	<body>
@@ -72,6 +170,8 @@
 
 				var progressbar = $( "#progressbar" ),
 			      progressLabel = $( ".progress-label" );
+
+			    $("#draggable_cuttingplane_window").draggable({ containment: "#canvas-frame", scroll: false});
 			 
 			    progressbar.progressbar({
 			      value: false,
@@ -179,6 +279,34 @@
 				}
 		</script>
 		<div id="progressbar"><div class="progress-label">Loading...</div></div>
-		<div id="canvas-frame"></div>
+		<div id="canvas-frame">
+			<div id="draggable_cuttingplane_window" class="draggable ui-widget-content">
+				<div class="header" style="cursor: move;">
+					<div class="title" unselectable="on" style="cursor: move;">CUTTING PLANE</div>
+					<div class="close" title="Close"></div>
+				</div>
+				<div class="body">
+				<div class="planehint">Select the plane</div>
+				<input type="submit" value planex="true" class="annotator-button" title="Plane X">
+				<input type="submit" value planey="true" class="annotator-button" title="Plane Y">
+				<input type="submit" value planez="true" class="annotator-button" title="Plane Z" checked="true">
+				<div class="sliderhint">Slide to move the plane</div>
+				<div class="slider">
+					<div class="box">
+						<div class="leftBlocker"></div>
+						<div class="rightBlocker"></div>
+						<div class="dhtmlxSlider" style="width: 170px;">
+							<div class="leftSide" style="background-image: url(/images/_/viewer/skins/default/leftside_bg.gif); background-position:initial initial; background-repeat: initial initial;"></div>
+							<div class="leftZone" style="background-image: url(/images/_/viewer/skins/default/leftzone_bg.gif); width: 0px; background-position:initial initial; background-repeat: initial initial;"></div>
+							<div class="rightZone" style="background-image: url(/images/_/viewer/skins/default/rightzone_bg.gif); width: 170px; background-position:initial initial; background-repeat: initial initial;"></div>
+							<div class="rightSide" style="background-image: url(/images/_/viewer/skins/default/rightside_bg.gif); background-position:initial initial; background-repeat: initial initial;"></div>
+							<div class="selector" style="background-image: url(/images/_/viewer/skins/default/selector.gif); left 0px;"></div>
+						</div>
+					</div>
+					<div class=inverse></div>
+				</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
