@@ -609,6 +609,9 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	}
 
+	this.disable = function(){this.enabled = false;}
+	this.enable = function() {this.enabled = true;}
+
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 	this.domElement.addEventListener( 'mousedown', onMouseDown, false );
 	this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );

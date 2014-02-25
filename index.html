@@ -105,6 +105,13 @@
 	  		user-select:none
 	  	}
 
+	  	.draggable>.body>#cuttingplane_raido
+	  	{
+	  		position: absolute;
+	  		left: 13px;
+	  		top: 34px;
+	  	}
+
 
 	  	.draggable>.body>.annotator-button[planex]{position:absolute;left:13px;top:34px;width:34px;height:34px;background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -573px 1px}
 	  	.draggable>.body>.annotator-button[planex]:hover{background:url("/images/_/viewer/3d_newviewer_icons2.png") no-repeat -573px -33px}
@@ -125,16 +132,12 @@
 		.draggable>.body>.slider>.box{position:absolute;left:5px;top:9px;width:170px;height:25px}
 		.draggable>.body>.slider>.inverse{position:absolute;right:8px;top:8px;width:27px;height:27px;background:url("/images/_/viewer/popup_inverse.png") repeat scroll 0 0 transparent;cursor:pointer}
 
-		.draggable .leftBlocker{position:absolute;top:0px;left:0px;width:6px;height:100%;background:url("/images/_/viewer/skins/default/leftside_bg.gif") repeat scroll 0 0 transparent;z-index:121}
-		.draggable .rightBlocker{position:absolute;top:0px;right:0px;width:6px;height:100%;background:url("/images/_/viewer/skins/default/rightside_bg.gif") repeat scroll 0 0 transparent;z-index:121}
-
-		.draggable .dhtmlxSlider{position:relative;overflow:hidden;height:25px;left:0px}
-		.draggable .dhtmlxSlider .selector{position:absolute;overflow:hidden;height:100%;width:21px}
-		.draggable .dhtmlxSlider .leftSide{position:absolute;left:0px;top:0px;width:0px;height:100%}
-		.draggable .dhtmlxSlider .leftZone{position:absolute;top:0px;left:0px;width:0px;height:100%}
-		.draggable .dhtmlxSlider .rightSide{position:absolute;right:0px;top:0px;width:0px;height:100%}
-		.draggable .dhtmlxSlider .rightZone{position:absolute;left:0px;width:0px;height:100%}
-
+		.draggable #cuttingplane_slider{
+			position:absolute;
+			top:15%;
+			left:10px;
+			width: 140px;
+		}
 		</style>
 	</head>
 	<body>
@@ -161,17 +164,52 @@
 				gl_FragColor = vec4( mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
 			}
 		</script>
+		<script type="x-shader/x-fragment" id="cuttingplaneShader">
+			uniform bool clipEnabled;
+			uniform bool clipInside;
+			uniform vec4 clipNormalAndDist;
+		</script>
 		<script>
 			
 
 			var camera, controls, scene, renderer;
+			var stopControls = false;
 
 			$(document).ready(function(){
 
 				var progressbar = $( "#progressbar" ),
 			      progressLabel = $( ".progress-label" );
 
-			    $("#draggable_cuttingplane_window").draggable({ containment: "#canvas-frame", scroll: false});
+			    $("#draggable_cuttingplane_window").draggable({
+			    	containment: "#canvas-frame", 
+			    	scroll: false,
+			    	start: function() {
+			    		if(controls)
+			    			controls.disable();
+			    	},
+			    	stop: function() {
+			    		if(controls)
+			    			controls.enable();
+			    	}
+			    });
+
+			    // setup cuttingplane_slider range
+			    $( "#cuttingplane_slider" ).slider({
+				    value: 60,
+				    orientation: "horizontal",
+				    range: "min",
+				    animate: true,
+				    start: function(event, ui) {
+			    		if(controls)
+			    			controls.disable();
+				    },
+				    stop: function(event, ui){
+				    	if(controls)
+			    			controls.enable();
+				    }
+			    });
+
+			    $("#cuttingplane_raido").buttonset();
 			 
 			    progressbar.progressbar({
 			      value: false,
@@ -195,7 +233,7 @@
 				controls = new THREE.OrbitControls(camera);
 				controls.addEventListener('change', render);
 
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({antialias: true});
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.getElementById('canvas-frame').appendChild( renderer.domElement );
 
@@ -271,6 +309,8 @@
 
 			
 				function render() {
+					if(stopControls == true)
+						return;
 					// requestAnimationFrame(render);
 
 					// cube.rotation.x += 0.1;
@@ -287,21 +327,18 @@
 				</div>
 				<div class="body">
 				<div class="planehint">Select the plane</div>
-				<input type="submit" value planex="true" class="annotator-button" title="Plane X">
+				<div id="cuttingplane_raido">
+					<input type="radio" id="planex" name="radio" checked="checked"><label class="annotator-button" for="planex">X</label>
+					<input type="radio" id="planey" name="radio"><label class="annotator-button" for="planey">Y</label>
+					<input type="radio" id="planez" name="radio"><label class="annotator-button" for="planez">Z</label>
+				</div>
+				<!-- <input type="submit" value planex="true" class="annotator-button" title="Plane X">
 				<input type="submit" value planey="true" class="annotator-button" title="Plane Y">
-				<input type="submit" value planez="true" class="annotator-button" title="Plane Z" checked="true">
+				<input type="submit" value planez="true" class="annotator-button" title="Plane Z" checked="true"> -->
 				<div class="sliderhint">Slide to move the plane</div>
 				<div class="slider">
 					<div class="box">
-						<div class="leftBlocker"></div>
-						<div class="rightBlocker"></div>
-						<div class="dhtmlxSlider" style="width: 170px;">
-							<div class="leftSide" style="background-image: url(/images/_/viewer/skins/default/leftside_bg.gif); background-position:initial initial; background-repeat: initial initial;"></div>
-							<div class="leftZone" style="background-image: url(/images/_/viewer/skins/default/leftzone_bg.gif); width: 0px; background-position:initial initial; background-repeat: initial initial;"></div>
-							<div class="rightZone" style="background-image: url(/images/_/viewer/skins/default/rightzone_bg.gif); width: 170px; background-position:initial initial; background-repeat: initial initial;"></div>
-							<div class="rightSide" style="background-image: url(/images/_/viewer/skins/default/rightside_bg.gif); background-position:initial initial; background-repeat: initial initial;"></div>
-							<div class="selector" style="background-image: url(/images/_/viewer/skins/default/selector.gif); left 0px;"></div>
-						</div>
+						<div id="cuttingplane_slider"></div>
 					</div>
 					<div class=inverse></div>
 				</div>
