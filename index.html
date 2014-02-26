@@ -5,9 +5,12 @@
 		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 	  	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 	  	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-		<script src="https://rawgithub.com/mrdoob/three.js/master/build/three.js"></script>
+		<script src="js/libs/three.js"></script>
 		<script type="text/javascript" src="js/controls/OrbitControls.js"></script>
+		<script type="text/javascript" src="js/controls/CuttingplaneControl.js"></script>
 		<script src="modelloader.js"></script>
+		<script type="text/javascript" src="js/libs/csg.js"></script>
+		<script type="text/javascript" src="js/libs/ThreeCSG.js"></script>
 		<style>
 		canvas 
 		{ 
@@ -172,7 +175,8 @@
 		<script>
 			
 
-			var camera, controls, scene, renderer;
+			var camera, controls, scene, sceneModel, renderer;
+			var cuttingplaneControl;
 			var stopControls = false;
 
 			$(document).ready(function(){
@@ -233,6 +237,8 @@
 				controls = new THREE.OrbitControls(camera);
 				controls.addEventListener('change', render);
 
+				cuttingplaneControl = new THREE.CuttingplaneControl(scene);
+
 				renderer = new THREE.WebGLRenderer({antialias: true});
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.getElementById('canvas-frame').appendChild( renderer.domElement );
@@ -283,7 +289,9 @@
 
 
 				// load model.
-				modelloader.loadmodel(scene);
+				var modelloader = new Wanna.ModelLoader(scene);
+				modelloader.addEventListener('end', showBBox);
+				modelloader.LoadModel();
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				// $(window).resize(function(arg){
@@ -307,6 +315,13 @@
 				render();
 			}
 
+			function showBBox()
+			{
+				// this is the model loader.
+				// draw the bbox of the model.
+				
+			}
+
 			
 				function render() {
 					if(stopControls == true)
@@ -316,6 +331,7 @@
 					// cube.rotation.x += 0.1;
 					// cube.rotation.y += 0.1;
 					renderer.render(scene, camera);
+					renderer.render(sceneModel, camera);
 				}
 		</script>
 		<div id="progressbar"><div class="progress-label">Loading...</div></div>

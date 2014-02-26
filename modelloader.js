@@ -1,69 +1,24 @@
-var modelloader = function(){
-	function loadmodel(scene)
+var Wanna = Wanna || {}
+
+Wanna.ModelLoader = function(scene) {
+
+	this.scene = scene;
+
+	// bounding box.
+	this.BBoxMin = new THREE.Vector3();
+	this.BBoxMax = new THREE.Vector3();
+
+	this.ExtendBBox = function(minvec, maxvec)
 	{
-		var progressbar = $( "#progressbar" ),
-      		progressLabel = $( ".progress-label" );
-
-		var pagesCount = 100;
-	    var pageLength = 0;
-	    var lastPageLength = 0;
-	    $.ajax({ url: 'https://api.mongolab.com/api/1/databases/revitmodel/collections/simplesamplemodelinscenejs?c=true&apiKey=95_aw1Mpmlz3UAbIWGacgzH1a00vPopr',
-	      type: "GET",
-	      contentType: "application/json",
-	      success: function(msg) {
-	        var totallInstances = parseInt(msg);
-	        pageLength = Math.floor(totallInstances/pagesCount);
-	        lastPageLength = totallInstances - pageLength * (pagesCount - 1);
-	        //alert(pagesLength + "x 99 + " + lastPageLength + "=" + totallInstances); //11
-
-
-		        // paging
-		        window.modelNodes = [];
-		        for(var i=0; i<pagesCount; i++)
-		        {
-		          var newPageLength = (i==pagesCount-1)? lastPageLength : pageLength;
-		          var urlString = 'https://api.mongolab.com/api/1/databases/revitmodel/collections/simplesamplemodelinscenejs?sk='+ (i*pageLength).toString() +
-		            '&l=' + newPageLength.toString() + '&apiKey=95_aw1Mpmlz3UAbIWGacgzH1a00vPopr';
-		          //alert(urlString);
-		          $.ajax({ url: urlString,
-		            type: "GET",
-		            contentType: "application/json",
-		            success: function(msg) {
-		              var val = progressbar.progressbar( "value" ) || 0;        
-		              progressbar.progressbar( "value", val + 1 );
-
-		              for(var j = 0; j<msg.length; j++)
-		              {
-		              	var obj = msg[j];
-		              	if(obj != null)
-		              	{
-		              		var object = loadModelProgressive({ x: -6.97676849365234, y: 11.3435325622559, z: -14.2272529602051 }, obj);
-		              		if(object != null)
-		              		{
-			         		    window.modelNodes.push(object);
-			              		scene.add(object); 			
-		              		}
-
-		              	}	
-		              }
-		              if(window.modelNodes.length == totallInstances)
-		              {
-		              	// load them to the scene.
-		              	//loadModelWithCenterpoint({ x: -6.97676849365234, y: 11.3435325622559, z: -14.2272529602051 });
-		              	progressbar.progressbar( "value", 100 );
-		              	$("#progressbar").remove();
-		              }
-
-		            }
-		          });          
-		        }
-
-	     	}
-	    });
-
+		this.BBoxMax.set(Math.max(maxvec.x, this.BBoxMax.x), Math.max(maxvec.y, this.BBoxMax.y), Math.max(maxvec.z, this.BBoxMax.z));
+		this.BBoxMin.set(Math.min(minvec.x, this.BBoxMax.x), Math.min(minvec.y, this.BBoxMax.y), Math.min(minvec.z, this.BBoxMax.z));
 	}
 
-	function loadModelProgressive(centerpoint, obj)
+	// events
+	var endEvent = { type: 'end'};
+
+
+	function loadModelProgressive(scope, centerpoint, obj)
 	{
 		if(obj.type == "flags")
 		{
@@ -110,23 +65,85 @@ var modelloader = function(){
 			object.add( mesh );
 			geometry.computeCentroids();
 			geometry.computeFaceNormals();
-			geometry.computeBoundingSphere();
+			//geometry.computeBoundingSphere();
+			geometry.computeBoundingBox();
+
+			// extend the bounding box of the scene.
+			scope.ExtendBBox(geometry.boundingBox.min, geometry.boundingBox.max);
+
 			object.position = new THREE.Vector3(centerpoint.x, centerpoint.y, centerpoint.z);
 			return object;		
 		}
-
-
-		// var parent = SceneJS.scene("theScene").findNode("theGeometryParent");
-		// parent.add("node", obj);
-		// translateNode.set("x", -centerpoint.x);
-	 //    translateNode.set("y", -centerpoint.y);
-	 //    translateNode.set("z", -centerpoint.z);
-	 //    newInput = true;
 	}
 
-	return {
-		loadmodel : function(scene) {
-			loadmodel(scene);
-		}
-	};
-}();
+
+	this.LoadModel = function()
+	{
+		var progressbar = $( "#progressbar" ),
+      		progressLabel = $( ".progress-label" );
+
+		var pagesCount = 100;
+	    var pageLength = 0;
+	    var lastPageLength = 0;
+	    var scope = this;
+	    $.ajax({ url: 'https://api.mongolab.com/api/1/databases/revitmodel/collections/simplesamplemodelinscenejs?c=true&apiKey=95_aw1Mpmlz3UAbIWGacgzH1a00vPopr',
+	      type: "GET",
+	      contentType: "application/json",
+	      success: function(msg) {
+	        var totallInstances = parseInt(msg);
+	        pageLength = Math.floor(totallInstances/pagesCount);
+	        lastPageLength = totallInstances - pageLength * (pagesCount - 1);
+	        //alert(pagesLength + "x 99 + " + lastPageLength + "=" + totallInstances); //11
+
+
+		        // paging
+		        window.modelNodes = [];
+		        for(var i=0; i<pagesCount; i++)
+		        {
+		          var newPageLength = (i==pagesCount-1)? lastPageLength : pageLength;
+		          var urlString = 'https://api.mongolab.com/api/1/databases/revitmodel/collections/simplesamplemodelinscenejs?sk='+ (i*pageLength).toString() +
+		            '&l=' + newPageLength.toString() + '&apiKey=95_aw1Mpmlz3UAbIWGacgzH1a00vPopr';
+		          //alert(urlString);
+		          $.ajax({ url: urlString,
+		            type: "GET",
+		            contentType: "application/json",
+		            success: function(msg) {
+		              var val = progressbar.progressbar( "value" ) || 0;        
+		              progressbar.progressbar( "value", val + 1 );
+
+		              for(var j = 0; j<msg.length; j++)
+		              {
+		              	var obj = msg[j];
+		              	if(obj != null)
+		              	{
+		              		var object = loadModelProgressive(scope, { x: -6.97676849365234, y: 11.3435325622559, z: -14.2272529602051 }, obj);
+		              		if(object != null)
+		              		{
+			         		    window.modelNodes.push(object);
+			              		scope.scene.add(object); 	
+		              		}
+
+		              	}	
+		              }
+
+		              if(window.modelNodes.length == totallInstances)
+		              {
+		              	// load them to the scene.
+		              	//loadModelWithCenterpoint({ x: -6.97676849365234, y: 11.3435325622559, z: -14.2272529602051 });
+		              	progressbar.progressbar( "value", 100 );
+		              	$("#progressbar").remove();
+
+		              	scope.dispatchEvent( endEvent );
+		              }
+
+		            }
+		          });          
+		        }
+
+	     	}
+	    });
+
+	}
+};
+
+Wanna.ModelLoader.prototype = Object.create( THREE.EventDispatcher.prototype );
