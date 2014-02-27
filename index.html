@@ -9,8 +9,6 @@
 		<script type="text/javascript" src="js/controls/OrbitControls.js"></script>
 		<script type="text/javascript" src="js/controls/CuttingplaneControl.js"></script>
 		<script src="modelloader.js"></script>
-		<script type="text/javascript" src="js/libs/csg.js"></script>
-		<script type="text/javascript" src="js/libs/ThreeCSG.js"></script>
 		<style>
 		canvas 
 		{ 
@@ -199,7 +197,7 @@
 
 			    // setup cuttingplane_slider range
 			    $( "#cuttingplane_slider" ).slider({
-				    value: 60,
+				    value: 0,
 				    orientation: "horizontal",
 				    range: "min",
 				    animate: true,
@@ -210,10 +208,46 @@
 				    stop: function(event, ui){
 				    	if(controls)
 			    			controls.enable();
+				    },
+				    slide: function( event, ui ) {
+
+				    	try{
+					    	var value = ui.value;
+					    	if(cuttingplaneControl != null)
+					    		cuttingplaneControl.SetValue(value);
+					    	if(renderer != null)
+					    		render();				    		
+				    	} catch(err){}
+
 				    }
 			    });
 
 			    $("#cuttingplane_raido").buttonset();
+			    $("#cuttingplane_raido input").bind("click",function(){
+                	// do whatever you want to do with clicked button
+                	var plane = 0; //0 for x;
+                	if(this.id == "planey")
+                	{
+                		plane = 1;
+                	}
+                	else if(this.id == "planez")
+                		plane = 2;
+
+                	if(cuttingplaneControl != null)
+                		cuttingplaneControl.CuttingPlane = plane;
+
+                	// reset the slider bar to zero.
+                	$( "#cuttingplane_slider" ).slider( "value", 0 );
+
+                	try{
+	                	if(cuttingplaneControl != null)
+					    	cuttingplaneControl.Setback();
+
+					    if(renderer != null)
+					    	render();                		
+                	}catch(err) {}
+
+    			});
 			 
 			    progressbar.progressbar({
 			      value: false,
@@ -319,7 +353,12 @@
 			{
 				// this is the model loader.
 				// draw the bbox of the model.
-				
+				if(cuttingplaneControl != null)
+				{
+					cuttingplaneControl.SetBoundingBox(this.BBoxMin, this.BBoxMax);
+
+					cuttingplaneControl.CreateBoundingBoxCube();
+				}
 			}
 
 			

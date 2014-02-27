@@ -11,7 +11,7 @@ Wanna.ModelLoader = function(scene) {
 	this.ExtendBBox = function(minvec, maxvec)
 	{
 		this.BBoxMax.set(Math.max(maxvec.x, this.BBoxMax.x), Math.max(maxvec.y, this.BBoxMax.y), Math.max(maxvec.z, this.BBoxMax.z));
-		this.BBoxMin.set(Math.min(minvec.x, this.BBoxMax.x), Math.min(minvec.y, this.BBoxMax.y), Math.min(minvec.z, this.BBoxMax.z));
+		this.BBoxMin.set(Math.min(minvec.x, this.BBoxMin.x), Math.min(minvec.y, this.BBoxMin.y), Math.min(minvec.z, this.BBoxMin.z));
 	}
 
 	// events
@@ -111,20 +111,28 @@ Wanna.ModelLoader = function(scene) {
 		              var val = progressbar.progressbar( "value" ) || 0;        
 		              progressbar.progressbar( "value", val + 1 );
 
-		              for(var j = 0; j<msg.length; j++)
-		              {
-		              	var obj = msg[j];
-		              	if(obj != null)
-		              	{
-		              		var object = loadModelProgressive(scope, { x: -6.97676849365234, y: 11.3435325622559, z: -14.2272529602051 }, obj);
-		              		if(object != null)
-		              		{
-			         		    window.modelNodes.push(object);
-			              		scope.scene.add(object); 	
-		              		}
+		              try{
+		              		for(var j = 0; j<msg.length; j++)
+				              {
+				              	var obj = msg[j];
+				              	if(obj != null)
+				              	{
+				              		var object = loadModelProgressive(scope, { x: -6.97676849365234, y: 11.3435325622559, z: -14.2272529602051 }, obj);
+				              		if(object != null)
+				              		{
+					         		    window.modelNodes.push(object);
+					              		scope.scene.add(object); 	
+				              		}
 
-		              	}	
+				              	}	
+				              }	
 		              }
+		              catch(err)
+		              {}
+
+
+		              if(val == 10)
+		              	scope.dispatchEvent( endEvent );
 
 		              if(window.modelNodes.length == totallInstances)
 		              {
@@ -133,7 +141,7 @@ Wanna.ModelLoader = function(scene) {
 		              	progressbar.progressbar( "value", 100 );
 		              	$("#progressbar").remove();
 
-		              	scope.dispatchEvent( endEvent );
+		              	//scope.dispatchEvent( endEvent );
 		              }
 
 		            }
